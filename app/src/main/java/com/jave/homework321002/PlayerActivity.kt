@@ -32,6 +32,8 @@ class PlayerActivity : AppCompatActivity() {
 			val id = intent.extras?.getInt("id") ?: throw IllegalArgumentException("id required")
 			PredefinedVideos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
+		title = predefinedVideo.name
+
 		surfaceView = findViewById(R.id.surfaceView)
 		surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
 			override fun surfaceCreated(holder: SurfaceHolder) {
@@ -194,6 +196,7 @@ class PlayerActivity : AppCompatActivity() {
 	}
 
 	fun hideMediaController() {
+		if (editing) return
 		mediaController.visibility = View.GONE
 		handler.removeMessages(SHOW_PROGRESS)
 		isShowing = false
