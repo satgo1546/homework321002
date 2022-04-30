@@ -6,7 +6,12 @@
 					android:icon="@drawable/ic_launcher_background"
 					android:label="@string/app_name"
 					android:supportsRtl="true"
-					android:theme="@style/Theme.Homework321002">
+					android:theme="@style/Theme.Homework321002"
+					android:allowBackup="true"
+					android:fullBackupOnly="true">
+		<activity
+						android:name=".PlayerActivity"
+						android:exported="true"/>
 		<activity
 						android:name=".MainActivity"
 						android:exported="true">
