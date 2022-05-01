@@ -1,9 +1,9 @@
 package com.jave.homework321002
 
+import android.animation.TimeAnimator
+import android.content.res.Configuration
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -12,21 +12,21 @@ import androidx.appcompat.app.AppCompatActivity
 // https://github.com/brightec/ExampleMediaController
 class PlayerActivity : AppCompatActivity() {
 	var editing = false
+	lateinit var root: LinearLayout
 	lateinit var editingPanel: ViewGroup
 	lateinit var surfaceView: SurfaceView
-	lateinit var mediaController: ViewGroup
 	lateinit var player: MediaPlayer
 	lateinit var pauseButton: ImageButton
 	lateinit var mediaControllerProgress: SeekBar
 	lateinit var currentTime: TextView
 	lateinit var endTime: TextView
-	var isShowing = false
+	lateinit var animator: TimeAnimator
 	var dragging = false
-	val handler: Handler = MessageHandler(this)
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_player)
+		root = findViewById(R.id.root)
 		editingPanel = findViewById(R.id.editingPanel)
 		val predefinedVideo = run {
 			val id = intent.extras?.getInt("id") ?: throw IllegalArgumentException("id required")
@@ -45,22 +45,16 @@ class PlayerActivity : AppCompatActivity() {
 			override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
 		})
 
-		mediaController = findViewById(R.id.mediaController)
 		pauseButton = findViewById(R.id.pause)
 		pauseButton.setOnClickListener {
 			if (player.isPlaying) player.pause() else player.start()
-			updatePausePlay()
-			showMediaController()
+			updateUi()
 		}
 		findViewById<ImageButton>(R.id.ffwd).setOnClickListener {
 			player.seekTo(player.currentPosition + 15000)
-			updateMediaProgress()
-			showMediaController()
 		}
 		findViewById<ImageButton>(R.id.rew).setOnClickListener {
 			player.seekTo(player.currentPosition - 5000)
-			updateMediaProgress()
-			showMediaController()
 		}
 		mediaControllerProgress = findViewById(R.id.mediacontroller_progress)
 		mediaControllerProgress.max = 1000
@@ -76,17 +70,8 @@ class PlayerActivity : AppCompatActivity() {
 			// The second scenario involves the user operating the scroll ball, in this
 			// case there WON'T BE onStartTrackingTouch/onStopTrackingTouch notifications,
 			// we will simply apply the updated position without suspending regular updates.
-
 			override fun onStartTrackingTouch(bar: SeekBar) {
-				showMediaController(999999999)
 				dragging = true
-
-				// By removing these pending progress messages we make sure
-				// that a) we won't update the progress while the user adjusts
-				// the seekbar and b) once the user is done dragging the thumb
-				// we will post one of these messages to the queue again and
-				// this ensures that there will be exactly one message queued up.
-				handler.removeMessages(SHOW_PROGRESS)
 			}
 
 			override fun onProgressChanged(bar: SeekBar, progress: Int, fromuser: Boolean) {
@@ -99,14 +84,7 @@ class PlayerActivity : AppCompatActivity() {
 
 			override fun onStopTrackingTouch(bar: SeekBar) {
 				dragging = false
-				updateMediaProgress()
-				updatePausePlay()
-				showMediaController()
-
-				// Ensure that progress is properly updated in the future,
-				// the call to show() does not guarantee this because it is a
-				// no-op if we are already showing.
-				handler.sendEmptyMessage(SHOW_PROGRESS)
+				updateUi()
 			}
 		})
 		currentTime = findViewById(R.id.time_current)
@@ -116,32 +94,57 @@ class PlayerActivity : AppCompatActivity() {
 			setDataSource(resources.openRawResourceFd(predefinedVideo.resourceId))
 			setOnPreparedListener {
 				start()
+				animator.start()
+				updateUi()
 			}
 		}
 		findViewById<Button>(R.id.leaveEditingButton).setOnClickListener {
-			leaveEditing()
+			editing = false
+			updateUi()
 		}
-		leaveEditing()
+		animator = TimeAnimator().apply {
+			setTimeListener { _, _, _ ->
+				if (dragging) return@setTimeListener
+				val position = player.currentPosition
+				val duration = player.duration
+				if (duration > 0) {
+					// use long to avoid overflow
+					val pos = 1000L * position / duration
+					mediaControllerProgress.progress = pos.toInt()
+				}
+				currentTime.text = stringForTime(position)
+				endTime.text = stringForTime(duration)
+			}
+		}
+		updateUi()
 	}
 
 	override fun onPause() {
 		super.onPause()
 		player.pause()
-		updatePausePlay()
+		updateUi()
 	}
 
-	fun enterEditing() {
-		editing = true
-		editingPanel.visibility = View.VISIBLE
-		supportActionBar?.hide()
-		showMediaController(999999999)
-	}
-
-	fun leaveEditing() {
-		editing = false
-		editingPanel.visibility = View.GONE
-		supportActionBar?.show()
-		hideMediaController()
+	fun updateUi() {
+		if (editing) {
+			editingPanel.visibility = View.VISIBLE
+			supportActionBar?.hide()
+		} else {
+			editingPanel.visibility = View.GONE
+			supportActionBar?.show()
+		}
+		root.orientation = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			LinearLayout.HORIZONTAL
+		} else {
+			LinearLayout.VERTICAL
+		}
+		pauseButton.setImageResource(
+			if (player.isPlaying) {
+				android.R.drawable.ic_media_pause
+			} else {
+				android.R.drawable.ic_media_play
+			}
+		)
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -150,21 +153,12 @@ class PlayerActivity : AppCompatActivity() {
 			setIcon(android.R.drawable.ic_menu_edit)
 			setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
 			setOnMenuItemClickListener {
-				enterEditing()
+				editing = true
+				updateUi()
 				true
 			}
 		}
 		return true
-	}
-
-	override fun onTouchEvent(event: MotionEvent): Boolean {
-		showMediaController()
-		return false
-	}
-
-	override fun onTrackballEvent(event: MotionEvent?): Boolean {
-		showMediaController()
-		return false
 	}
 
 	fun stringForTime(timeMs: Int): String {
@@ -179,99 +173,8 @@ class PlayerActivity : AppCompatActivity() {
 		}
 	}
 
-	fun showMediaController(timeout: Int = 3000) {
-		if (!isShowing) {
-			updateMediaProgress()
-			mediaController.visibility = View.VISIBLE
-			isShowing = true
-		}
-		updatePausePlay()
-
-		// cause the progress bar to be updated even if mShowing
-		// was already true.  This happens, for example, if we're
-		// paused with the progress bar showing the user hits play.
-		handler.sendEmptyMessage(SHOW_PROGRESS)
-		handler.removeMessages(FADE_OUT)
-		handler.sendMessageDelayed(handler.obtainMessage(FADE_OUT), timeout.toLong())
-	}
-
-	fun hideMediaController() {
-		if (editing) return
-		mediaController.visibility = View.GONE
-		handler.removeMessages(SHOW_PROGRESS)
-		isShowing = false
-	}
-
-	private fun updateMediaProgress(): Int {
-		if (dragging) return 0
-		val position = player.currentPosition
-		val duration = player.duration
-		if (duration > 0) {
-			// use long to avoid overflow
-			val pos = 1000L * position / duration
-			mediaControllerProgress.progress = pos.toInt()
-		}
-		mediaControllerProgress.secondaryProgress = 500
-		currentTime.text = stringForTime(position)
-		endTime.text = stringForTime(duration)
-		return position
-	}
-
-	override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-		val uniqueDown = (event.repeatCount == 0 && event.action == KeyEvent.ACTION_DOWN)
-		when (event.keyCode) {
-			KeyEvent.KEYCODE_HEADSETHOOK, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_SPACE -> {
-				if (uniqueDown) {
-					pauseButton.callOnClick()
-					showMediaController()
-				}
-				return true
-			}
-			KeyEvent.KEYCODE_MEDIA_PLAY -> {
-				if (uniqueDown && !player.isPlaying) {
-					player.start()
-					updatePausePlay()
-					showMediaController()
-				}
-				return true
-			}
-			KeyEvent.KEYCODE_MEDIA_STOP, KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-				if (uniqueDown && player.isPlaying) {
-					player.pause()
-					updatePausePlay()
-					showMediaController()
-				}
-				return true
-			}
-			KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_MUTE -> {
-				// don't show the controls for volume adjustment
-				return super.dispatchKeyEvent(event)
-			}
-		}
-		showMediaController()
-		return super.dispatchKeyEvent(event)
-	}
-
-	fun updatePausePlay() {
-		pauseButton.setImageResource(if (player.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play)
-	}
-
-	private class MessageHandler(private val activity: PlayerActivity) : Handler() {
-		override fun handleMessage(msg: Message) {
-			when (msg.what) {
-				FADE_OUT -> activity.hideMediaController()
-				SHOW_PROGRESS -> {
-					val pos = activity.updateMediaProgress()
-					if (!activity.dragging && activity.isShowing && activity.player.isPlaying) {
-						sendMessageDelayed(obtainMessage(SHOW_PROGRESS), (1000 - pos % 1000).toLong())
-					}
-				}
-			}
-		}
-	}
-
-	companion object {
-		private const val FADE_OUT = 1
-		private const val SHOW_PROGRESS = 2
+	override fun onConfigurationChanged(newConfig: Configuration) {
+		super.onConfigurationChanged(newConfig)
+		updateUi()
 	}
 }

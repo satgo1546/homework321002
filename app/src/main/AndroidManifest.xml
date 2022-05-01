@@ -11,7 +11,9 @@
 					android:fullBackupOnly="true">
 		<activity
 						android:name=".PlayerActivity"
-						android:exported="true"/>
+						android:exported="true"
+						android:configChanges="orientation|uiMode|touchscreen|layoutDirection|screenLayout|screenSize|smallestScreenSize|colorMode|keyboard|keyboardHidden|fontScale|fontWeightAdjustment|density|navigation|mcc|mnc"
+		/>
 		<activity
 						android:name=".MainActivity"
 						android:exported="true">
