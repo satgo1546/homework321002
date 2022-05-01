@@ -2,7 +2,6 @@ package com.jave.homework321002
 
 import android.animation.TimeAnimator
 import android.content.res.Configuration
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -14,8 +13,7 @@ class PlayerActivity : AppCompatActivity() {
 	var editing = false
 	lateinit var root: LinearLayout
 	lateinit var editingPanel: ViewGroup
-	lateinit var surfaceView: SurfaceView
-	lateinit var player: MediaPlayer
+	lateinit var player: VideoView
 	lateinit var pauseButton: ImageButton
 	lateinit var mediaControllerProgress: SeekBar
 	lateinit var currentTime: TextView
@@ -34,16 +32,13 @@ class PlayerActivity : AppCompatActivity() {
 		}
 		title = predefinedVideo.name
 
-		surfaceView = findViewById(R.id.surfaceView)
-		surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
-			override fun surfaceCreated(holder: SurfaceHolder) {
-				player.setDisplay(holder)
-				player.prepareAsync()
-			}
-
-			override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) = Unit
-			override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
-		})
+		player = findViewById(R.id.videoView)
+		player.setVideoPath("android.resource://$packageName/${predefinedVideo.resourceId}")
+		player.setOnPreparedListener {
+			it.start()
+			animator.start()
+			updateUi()
+		}
 
 		pauseButton = findViewById(R.id.pause)
 		pauseButton.setOnClickListener {
@@ -90,14 +85,6 @@ class PlayerActivity : AppCompatActivity() {
 		currentTime = findViewById(R.id.time_current)
 		endTime = findViewById(R.id.time)
 
-		player = MediaPlayer().apply {
-			setDataSource(resources.openRawResourceFd(predefinedVideo.resourceId))
-			setOnPreparedListener {
-				start()
-				animator.start()
-				updateUi()
-			}
-		}
 		findViewById<Button>(R.id.leaveEditingButton).setOnClickListener {
 			editing = false
 			updateUi()
