@@ -10,16 +10,16 @@ import androidx.appcompat.app.AppCompatActivity
 // 关于媒体控制器的实现抄自一教程，该教程中的代码又抄自Android本身。
 // https://github.com/brightec/ExampleMediaController
 class PlayerActivity : AppCompatActivity() {
-	var editing = false
-	lateinit var root: LinearLayout
-	lateinit var editingPanel: ViewGroup
-	lateinit var player: VideoView
-	lateinit var pauseButton: ImageButton
-	lateinit var mediaControllerProgress: SeekBar
-	lateinit var currentTime: TextView
-	lateinit var endTime: TextView
-	lateinit var animator: TimeAnimator
-	var dragging = false
+	private lateinit var root: LinearLayout
+	private lateinit var player: VideoView
+	private lateinit var pauseButton: ImageButton
+	private var dragging = false
+	private lateinit var mediaControllerProgress: SeekBar
+	private lateinit var currentTime: TextView
+	private lateinit var endTime: TextView
+	private lateinit var animator: TimeAnimator
+	private var editing = false
+	private lateinit var editingPanel: ViewGroup
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -37,6 +37,8 @@ class PlayerActivity : AppCompatActivity() {
 		player.setOnPreparedListener {
 			it.start()
 			animator.start()
+			mediaControllerProgress.max = it.duration
+			endTime.text = stringForTime(it.duration)
 			updateUi()
 		}
 
@@ -52,7 +54,6 @@ class PlayerActivity : AppCompatActivity() {
 			player.seekTo(player.currentPosition - 5000)
 		}
 		mediaControllerProgress = findViewById(R.id.mediacontroller_progress)
-		mediaControllerProgress.max = 1000
 		mediaControllerProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
 			// There are two scenarios that can trigger the seekbar listener to trigger:
 			//
@@ -71,10 +72,8 @@ class PlayerActivity : AppCompatActivity() {
 
 			override fun onProgressChanged(bar: SeekBar, progress: Int, fromuser: Boolean) {
 				if (!fromuser) return
-				(player.duration.toLong() * progress / 1000L).toInt().let {
-					player.seekTo(it)
-					currentTime.text = stringForTime(it)
-				}
+				player.seekTo(progress)
+				currentTime.text = stringForTime(progress)
 			}
 
 			override fun onStopTrackingTouch(bar: SeekBar) {
@@ -92,15 +91,8 @@ class PlayerActivity : AppCompatActivity() {
 		animator = TimeAnimator().apply {
 			setTimeListener { _, _, _ ->
 				if (dragging) return@setTimeListener
-				val position = player.currentPosition
-				val duration = player.duration
-				if (duration > 0) {
-					// use long to avoid overflow
-					val pos = 1000L * position / duration
-					mediaControllerProgress.progress = pos.toInt()
-				}
-				currentTime.text = stringForTime(position)
-				endTime.text = stringForTime(duration)
+				mediaControllerProgress.progress = player.currentPosition
+				currentTime.text = stringForTime(player.currentPosition)
 			}
 		}
 		updateUi()
