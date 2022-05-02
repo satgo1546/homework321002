@@ -2,6 +2,7 @@ package com.jave.homework321002
 
 import android.animation.TimeAnimator
 import android.content.res.Configuration
+import android.graphics.*
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -12,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 class PlayerActivity : AppCompatActivity() {
 	private lateinit var root: LinearLayout
 	private lateinit var player: VideoView
+	private var danmaku: ArrayList<Danmaku> = arrayListOf()
+	private lateinit var danmakuView: View
 	private lateinit var pauseButton: ImageButton
 	private var dragging = false
 	private lateinit var mediaControllerProgress: SeekBar
@@ -31,6 +34,9 @@ class PlayerActivity : AppCompatActivity() {
 			PredefinedVideos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
 		title = predefinedVideo.name
+		danmaku = resources.openRawResource(R.raw.bad_apple_comments).use {
+			Danmaku.listFromXml(it)
+		}
 
 		player = findViewById(R.id.videoView)
 		player.setVideoPath("android.resource://$packageName/${predefinedVideo.resourceId}")
@@ -41,6 +47,26 @@ class PlayerActivity : AppCompatActivity() {
 			endTime.text = stringForTime(it.duration)
 			updateUi()
 		}
+		danmakuView = object : View(this) {
+			val paint = Paint(Paint.SUBPIXEL_TEXT_FLAG).apply {
+				textSize = 24f
+				color = Color.WHITE
+				typeface = Typeface.SANS_SERIF
+			}
+			val rect = Rect()
+			override fun onDraw(canvas: Canvas?) {
+				super.onDraw(canvas)
+				canvas ?: return
+				danmaku.forEach {
+					paint.getTextBounds(it.text, 0, it.text.length, rect)
+					canvas.drawText(it.text, -rect.width() / 2f, rect.height() + 48f, paint)
+				}
+			}
+		}
+		findViewById<FrameLayout>(R.id.videoFrame).addView(
+			danmakuView,
+			FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+		)
 
 		pauseButton = findViewById(R.id.pause)
 		pauseButton.setOnClickListener {
@@ -90,9 +116,11 @@ class PlayerActivity : AppCompatActivity() {
 		}
 		animator = TimeAnimator().apply {
 			setTimeListener { _, _, _ ->
+				danmakuView.invalidate()
 				if (dragging) return@setTimeListener
-				mediaControllerProgress.progress = player.currentPosition
-				currentTime.text = stringForTime(player.currentPosition)
+				val t = player.currentPosition
+				mediaControllerProgress.progress = t
+				currentTime.text = stringForTime(t)
 			}
 		}
 		updateUi()
