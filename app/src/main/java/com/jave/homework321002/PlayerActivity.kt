@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.min
 
 // 关于媒体控制器的实现抄自一教程，该教程中的代码又抄自Android本身。
 // https://github.com/brightec/ExampleMediaController
@@ -34,12 +35,12 @@ class PlayerActivity : AppCompatActivity() {
 			PredefinedVideos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
 		title = predefinedVideo.name
-		danmaku = resources.openRawResource(R.raw.bad_apple_comments).use {
+		danmaku = resources.openRawResource(predefinedVideo.commentsResourceId).use {
 			Danmaku.listFromXml(it)
 		}
 
 		player = findViewById(R.id.videoView)
-		player.setVideoPath("android.resource://$packageName/${predefinedVideo.resourceId}")
+		player.setVideoPath("android.resource://$packageName/${predefinedVideo.videoResourceId}")
 		player.setOnPreparedListener {
 			it.start()
 			animator.start()
@@ -48,24 +49,39 @@ class PlayerActivity : AppCompatActivity() {
 			updateUi()
 		}
 		danmakuView = object : View(this) {
-			val paint = Paint(Paint.SUBPIXEL_TEXT_FLAG).apply {
-				textSize = 24f
-				color = Color.WHITE
+			val paint = Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.ANTI_ALIAS_FLAG).apply {
 				typeface = Typeface.SANS_SERIF
 			}
 			val rect = Rect()
 			override fun onDraw(canvas: Canvas?) {
 				super.onDraw(canvas)
 				canvas ?: return
-				danmaku.forEach {
-					paint.getTextBounds(it.text, 0, it.text.length, rect)
-					canvas.drawText(it.text, -rect.width() / 2f, rect.height() + 48f, paint)
+				val t = player.currentPosition / 1000f
+				val ts = 3f // 视频正常播放时，一条弹幕显示屏幕上的总时长，决定滚动弹幕的速度
+				for (i in danmaku.binarySearchBy(t - ts) { it.time }.let {
+					if (it < 0) -it - 1 else it
+				} until danmaku.size) {
+					val d = danmaku[i]
+					if (d.time > t) break
+					paint.textSize = d.fontSize * min(player.width, player.height) / 480f
+					paint.strokeWidth = paint.textSize / 20f
+					paint.getTextBounds(d.text, 0, d.text.length, rect)
+					val x = when (d.type) {
+						Danmaku.Type.SCROLLING -> (width + rect.width()) * (1f - (t - d.time) / ts) - rect.width()
+						Danmaku.Type.TOP, Danmaku.Type.BOTTOM -> (width - rect.width()) / 2f
+					}
+					val y = (i % (height / 2 / rect.height())) * rect.height().toFloat()
+					paint.style = Paint.Style.STROKE
+					paint.color = Color.BLACK
+					canvas.drawText(d.text, x, y, paint)
+					paint.style = Paint.Style.FILL
+					paint.color = d.color
+					canvas.drawText(d.text, x, y, paint)
 				}
 			}
 		}
 		findViewById<FrameLayout>(R.id.videoFrame).addView(
-			danmakuView,
-			FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+			danmakuView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 		)
 
 		pauseButton = findViewById(R.id.pause)

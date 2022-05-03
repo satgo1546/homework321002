@@ -39,6 +39,7 @@ data class Danmaku(
 					)
 				}
 			}
+			ret.sortBy { it.time }
 			return ret
 		}
 	}
