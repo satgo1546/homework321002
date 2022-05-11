@@ -22,12 +22,12 @@
 							android:layout_width="match_parent"
 							android:layout_height="match_parent" android:background="#333333">
 				<VideoView
-								android:layout_width="match_parent"
-								android:layout_height="match_parent" android:id="@+id/videoView"
-								android:layout_centerInParent="true"/>
+						android:layout_width="match_parent"
+						android:layout_height="match_parent" android:id="@+id/videoView"
+						android:layout_centerInParent="true"/>
 			</RelativeLayout>
 			<Button
-							android:text="Button"
+							android:text="返回"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content" android:id="@+id/button"/>
 		</FrameLayout>

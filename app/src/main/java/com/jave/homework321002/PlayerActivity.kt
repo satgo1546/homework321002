@@ -1,6 +1,7 @@
 package com.jave.homework321002
 
 import android.animation.TimeAnimator
+import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.*
 import android.os.Bundle
@@ -24,6 +25,7 @@ class PlayerActivity : AppCompatActivity() {
 	private lateinit var animator: TimeAnimator
 	private var editing = false
 	private lateinit var editingPanel: ViewGroup
+	private lateinit var backButton: Button
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -83,6 +85,11 @@ class PlayerActivity : AppCompatActivity() {
 		findViewById<FrameLayout>(R.id.videoFrame).addView(
 			danmakuView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 		)
+
+		backButton = findViewById(R.id.button)
+		backButton.setOnClickListener {
+			this.finish()
+		}
 
 		pauseButton = findViewById(R.id.pause)
 		pauseButton.setOnClickListener {
