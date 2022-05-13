@@ -1,11 +1,14 @@
 package com.jave.homework321002
 
 import android.animation.TimeAnimator
-import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.*
+import android.net.Uri
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import kotlin.math.min
@@ -37,12 +40,13 @@ class PlayerActivity : AppCompatActivity() {
 			PredefinedVideos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
 		title = predefinedVideo.name
-		danmaku = resources.openRawResource(predefinedVideo.commentsResourceId).use {
+		danmaku = contentResolver.openInputStream(Uri.parse(predefinedVideo.commentsPath)).use {
+			if (it == null) return@use arrayListOf()
 			Danmaku.listFromXml(it)
 		}
 
 		player = findViewById(R.id.videoView)
-		player.setVideoPath("android.resource://$packageName/${predefinedVideo.videoResourceId}")
+		player.setVideoPath(predefinedVideo.videoPath)
 		player.setOnPreparedListener {
 			it.start()
 			animator.start()
