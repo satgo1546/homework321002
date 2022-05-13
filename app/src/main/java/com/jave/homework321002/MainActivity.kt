@@ -17,46 +17,33 @@ class MainActivity : AppCompatActivity() {
 		title = "趣味音视频播放器 ←这什么土名字"
 
 		val listView = findViewById<ListView>(R.id.listView)
-		listView.adapter =
-			VideosAdapter(this, PredefinedVideos);
+		listView.adapter = VideosAdapter(this, PredefinedVideos).also { it.filter.filter("") }
 		listView.setOnItemClickListener { adapterView, view, i, l ->
 			startActivity(Intent(this, PlayerActivity::class.java).apply {
 				putExtra("id", PredefinedVideos[i].id)
 			})
 		}
 
+
 		findViewById<Button>(R.id.button4).setOnClickListener {
 			startActivity(Intent(this, HelpActivity::class.java))
 		}
 
+		findViewById<Button>(R.id.btn_open).setOnClickListener {
+			if (listView.adapter.isEmpty) return@setOnClickListener
+			startActivity(Intent(this, PlayerActivity::class.java).apply {
+				putExtra("id", (listView.adapter as VideosAdapter).currentList[0].id);
 
-		val search_button = findViewById<Button>(R.id.btn_open)
-
-		search_button.setOnClickListener {
-			if(listView.adapter.count == 0)
-				return@setOnClickListener
-			else
-				startActivity(Intent(this, PlayerActivity::class.java).apply {
-					putExtra("id", (listView.adapter as VideosAdapter).currentList[0].id);
 			})
 		}
 
-
-		val input_title = findViewById<EditText>(R.id.input_title)
-		input_title.addTextChangedListener(object : TextWatcher {
+		findViewById<EditText>(R.id.input_title).addTextChangedListener(object : TextWatcher {
 			override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-				// ignore
 				(listView.adapter as VideosAdapter).filter.filter(s.toString())
 			}
 
-			override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-				// ignore
-			}
-
-			override fun afterTextChanged(s: Editable) {
-
-			}
+			override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+			override fun afterTextChanged(s: Editable) = Unit
 		})
 	}
 }
-

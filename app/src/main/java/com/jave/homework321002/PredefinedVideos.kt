@@ -3,7 +3,7 @@ package com.jave.homework321002
 data class PredefinedVideo(
 	val id: Int,
 	val name: String,
-	val discription: String,
+	val description: String,
 	val videoResourceId: Int,
 	val commentsResourceId: Int,
 )

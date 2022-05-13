@@ -98,7 +98,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
                 list = new ArrayList();
 
                 for (PredefinedVideo recomend: videoList){
-                    if (recomend.getName().contains(charSequence)||recomend.getDiscription().contains(charSequence)){
+                    if (recomend.getName().contains(charSequence)||recomend.getDescription().contains(charSequence)){
                         Log.d("filter", "performFiltering:"+recomend.toString());
                         list.add(recomend);
                     }
