@@ -17,13 +17,12 @@ class MainActivity : AppCompatActivity() {
 		title = "趣味音视频播放器 ←这什么土名字"
 
 		val listView = findViewById<ListView>(R.id.listView)
-		listView.adapter = VideosAdapter(this, PredefinedVideos).also { it.filter.filter("") }
+		listView.adapter = VideosAdapter(this, (application as MyApplication).videos).also { it.filter.filter("") }
 		listView.setOnItemClickListener { adapterView, view, i, l ->
 			startActivity(Intent(this, PlayerActivity::class.java).apply {
-				putExtra("id", PredefinedVideos[i].id)
+				putExtra("id", (application as MyApplication).videos[i].id)
 			})
 		}
-
 
 		findViewById<Button>(R.id.button4).setOnClickListener {
 			startActivity(Intent(this, HelpActivity::class.java))
@@ -32,8 +31,7 @@ class MainActivity : AppCompatActivity() {
 		findViewById<Button>(R.id.btn_open).setOnClickListener {
 			if (listView.adapter.isEmpty) return@setOnClickListener
 			startActivity(Intent(this, PlayerActivity::class.java).apply {
-				putExtra("id", (listView.adapter as VideosAdapter).currentList[0].id);
-
+				putExtra("id", (listView.adapter as VideosAdapter).currentList[0].id)
 			})
 		}
 

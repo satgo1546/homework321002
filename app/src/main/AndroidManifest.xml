@@ -3,6 +3,7 @@
     package="com.jave.homework321002">
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:fullBackupOnly="true"
         android:icon="@drawable/ic_launcher_background"

@@ -37,7 +37,7 @@ class PlayerActivity : AppCompatActivity() {
 		editingPanel = findViewById(R.id.editingPanel)
 		val predefinedVideo = run {
 			val id = intent.extras?.getInt("id") ?: throw IllegalArgumentException("id required")
-			PredefinedVideos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
+			(application as MyApplication).videos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
 		title = predefinedVideo.name
 		danmaku = contentResolver.openInputStream(Uri.parse(predefinedVideo.commentsPath)).use {
