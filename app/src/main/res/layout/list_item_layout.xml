@@ -7,7 +7,7 @@
         android:layout_width="match_parent">
     <TextView
             android:id="@+id/text1"
-            android:layout_width="350dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"
             android:gravity="center_vertical"
@@ -16,7 +16,7 @@
             android:background="?android:attr/activatedBackgroundIndicator"
             android:minHeight="?android:attr/listPreferredItemHeightSmall"
             android:layout_weight="3"
-            android:textSize="28dp"
+            android:textSize="28sp"
             android:textFontWeight="@integer/material_motion_duration_medium_2"
     />
     <ImageView
