@@ -25,6 +25,11 @@ class MainActivity : AppCompatActivity() {
 			})
 		}
 
+		findViewById<Button>(R.id.button4).setOnClickListener {
+			startActivity(Intent(this, HelpActivity::class.java))
+		}
+
+
 		val search_button = findViewById<Button>(R.id.btn_open)
 
 		search_button.setOnClickListener {

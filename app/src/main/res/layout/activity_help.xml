@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_change"
+    tools:context=".HelpActivity">
+
+    <Button
+        android:id="@+id/button7"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="64dp"
+        android:insetTop="10dp"
+        android:text="返回"
+        android:textColorHighlight="#BC1D1D"
+        android:textColorLink="#AF3838"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="324dp"
+        android:layout_height="310dp"
+        android:layout_marginTop="248dp"
+        android:text="这是一个趣味音视频播放器，它不但可以获取本地视频列表、播放系统视频，还能加载弹幕，让观影过程更加有趣！"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
+        android:textSize="22sp"
+        app:layout_constraintBottom_toTopOf="@+id/button7"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+<gradient android:startColor="#52adcd" android:endColor="#1c87b1"
+    android:angle="270.0">
+</gradient>
+
+</shape>
