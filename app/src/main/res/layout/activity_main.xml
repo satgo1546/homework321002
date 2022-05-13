@@ -9,12 +9,12 @@
 	<LinearLayout
 			android:orientation="horizontal">
 		<EditText
-				android:id="@+id/input_title"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:hint="输入标题打开视频"
-				android:layout_weight="2.5"
-		/>
+						android:id="@+id/input_title"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:hint="输入标题打开视频"
+						android:layout_weight="2.5"
+						android:inputType="textNoSuggestions" android:importantForAutofill="no"/>
 		<Button
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
@@ -28,13 +28,13 @@
 					android:layout_height="match_parent">
 		<Button
 						style="?android:attr/buttonBarButtonStyle"
-						android:text="打开系统视频"
+						android:text="导入本地视频"
 						android:layout_weight="1"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content" android:id="@+id/button2"/>
 		<Button
 						style="?android:attr/buttonBarButtonStyle"
-						android:text="获取视频列表"
+						android:text="录制视频"
 						android:layout_weight="1"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content" android:id="@+id/button3"/>
