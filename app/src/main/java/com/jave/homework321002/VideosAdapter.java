@@ -50,6 +50,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
             view = inflater.inflate(R.layout.list_item_layout, null);
             viewHolder = new ViewHolder();
             viewHolder.videoName = view.findViewById(R.id.text1);
+            viewHolder.videoDescription = view.findViewById(R.id.textView);
             viewHolder.deleteButton = view.findViewById(R.id.btn_delete);
             view.setTag(viewHolder);
         }else {
@@ -57,6 +58,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
         }
 
         viewHolder.videoName.setText(currentList.get(i).getName());
+        viewHolder.videoDescription.setText(currentList.get(i).getDescription());
         viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,6 +72,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
 
     private class ViewHolder {
         public TextView videoName;
+        public TextView videoDescription;
         public ImageView deleteButton;
     }
 
