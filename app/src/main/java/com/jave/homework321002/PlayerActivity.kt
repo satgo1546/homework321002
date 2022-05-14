@@ -8,6 +8,8 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.jave.homework321002.Danmaku.Type.*
+import java.io.File
+import java.io.RandomAccessFile
 import kotlin.math.min
 
 // 关于媒体控制器的实现抄自一教程，该教程中的代码又抄自Android本身。
@@ -30,6 +32,10 @@ class PlayerActivity : AppCompatActivity() {
 	private lateinit var sendButton2: Button
 	private lateinit var saveButton1: Button
 	private lateinit var commentList: LinearLayout
+	// Comments是暂存用的，用户加的歌词存在当前Activity的Comments里，点击保存按钮后会把暂存的歌词加到弹幕列表里。
+	// 用Comments的原因是从动态生成的组件里取数据太麻烦了。
+	// 用户加完一堆字幕的时候有个机会审查一下，方便用户反悔。要是检查下来发现有不对劲的地方，就直接删了全部重来吧。
+	// （没想过做删除功能。删除还要从XML里面找，太难搞了。）
 	private var Comments = ArrayList<Danmaku>()
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -200,11 +206,8 @@ class PlayerActivity : AppCompatActivity() {
 			val danmu = findViewById<EditText>(R.id.input_danmaku).text
 			if(danmu.equals("")) return@setOnClickListener
 
-			val currentTime = (player.currentPosition / 1000f).toString()
-			var perDanmaku = "<d p=\"$currentTime,5,25,15138834\">$danmu</d>"
-
 			//将弹幕条例写进文件中
-
+			appendDanmaku(player.currentPosition / 1000f, intArrayOf(5, 25, 15138834), danmu.toString())
 			updateDanmaku()
 			Toast.makeText(this, "发送弹幕成功", Toast.LENGTH_SHORT).show()
 		}
@@ -212,18 +215,31 @@ class PlayerActivity : AppCompatActivity() {
 		saveButton1 = findViewById(R.id.btn_save_comments)
 		saveButton1.setOnClickListener {
 			for(d in Comments){
-				val currentTime = d.time
-				val text = d.text
-				var perComment = "<d p=\"$currentTime,8,30,16777215\">$text</d>"
-
 				//将评论写进文件中
+				appendDanmaku(d.time, intArrayOf(8, 30, 16777215), d.text)
 			}
-
+			Comments.clear()
 			updateDanmaku()
 			Toast.makeText(this, "保存歌词/评论成功", Toast.LENGTH_SHORT).show()
 		}
 
 		updateUi()
+	}
+
+	// 将一行弹幕写入文件中。
+	private fun appendDanmaku(time: Float, params: IntArray, text: String) {
+		// 怀念在文件里玩指针漂移的时光。
+		RandomAccessFile(File(filesDir, "$title.xml"), "rw").use {
+			// 在最末20字节寻找</i>，将新弹幕覆盖于其上。
+			val b = ByteArray(20)
+			it.seek(it.length() - b.size)
+			it.read(b)
+			it.seek(it.length() - b.size + b.toString(Charsets.ISO_8859_1).indexOf("</i>"))
+			it.write(params.joinToString(",", "<d p=\"$time,", "\">${
+				// 拼接字符串时注意转义。
+				text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+			}</d>\n</i>\n").encodeToByteArray())
+		}
 	}
 
 	override fun onPause() {
