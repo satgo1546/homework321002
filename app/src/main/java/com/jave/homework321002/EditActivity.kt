@@ -26,6 +26,7 @@ class EditActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_save_edit).setOnClickListener {
             //保存视频信息
 
+
             this.finish()
         }
 

@@ -306,7 +306,7 @@ class PlayerActivity : AppCompatActivity() {
 			val id = intent.extras?.getInt("id") ?: throw IllegalArgumentException("id required")
 			(application as MyApplication).videos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
-		val newDanmaku = contentResolver.openInputStream(Uri.parse(predefinedVideo.commentsPath)).use {
+		val newDanmaku = openFileInput("${predefinedVideo.name}.xml").use {
 			if (it == null) return@use arrayListOf()
 			Danmaku.listFromXml(it)
 		}
