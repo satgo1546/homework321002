@@ -1,7 +1,6 @@
 package com.jave.homework321002
 
 import android.animation.TimeAnimator
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.*
 import android.os.Bundle
@@ -9,8 +8,6 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.jave.homework321002.Danmaku.Type.*
-import java.io.FileOutputStream
-import java.io.IOException
 import kotlin.math.min
 
 // 关于媒体控制器的实现抄自一教程，该教程中的代码又抄自Android本身。
@@ -32,7 +29,6 @@ class PlayerActivity : AppCompatActivity() {
 	private lateinit var sendButton1: Button
 	private lateinit var sendButton2: Button
 	private lateinit var saveButton1: Button
-	private lateinit var saveButton2: Button
 	private lateinit var commentList: LinearLayout
 	private var Comments = ArrayList<Danmaku>()
 
@@ -221,13 +217,6 @@ class PlayerActivity : AppCompatActivity() {
 			updateDanmaku()
 			Toast.makeText(this, "保存歌词/评论成功", Toast.LENGTH_SHORT).show()
 		}
-
-		findViewById<Button>(R.id.shareButton).setOnClickListener {
-			startActivity(Intent(this, EditActivity::class.java).apply {
-				putExtra("id", predefinedVideo.id)
-			})
-		}
-
 
 		updateUi()
 	}
