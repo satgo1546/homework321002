@@ -45,10 +45,7 @@ class PlayerActivity : AppCompatActivity() {
 			(application as MyApplication).videos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
 		title = predefinedVideo.name
-		danmaku = openFileInput("${predefinedVideo.name}.xml").use {
-			if (it == null) return@use arrayListOf()
-			Danmaku.listFromXml(it)
-		}
+		updateDanmaku()
 
 		//获取视频歌词列表
 		for(comment in danmaku){
@@ -289,56 +286,12 @@ class PlayerActivity : AppCompatActivity() {
 		return (minutes*60+seconds)*1000
 	}
 
-	//加入新词条或弹幕后更新弹幕
+	// 加入新词条或弹幕后从文件重新加载弹幕。
 	fun updateDanmaku(){
-		val predefinedVideo = run {
-			val id = intent.extras?.getInt("id") ?: throw IllegalArgumentException("id required")
-			(application as MyApplication).videos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
-		}
-		val newDanmaku = openFileInput("${predefinedVideo.name}.xml").use {
-			if (it == null) return@use arrayListOf()
+		danmaku = openFileInput("$title.xml").use {
+			it ?: return@use arrayListOf()
 			Danmaku.listFromXml(it)
 		}
-
-		val addition = newDanmaku - danmaku.toSet()
-		if(addition.isEmpty())return
-
-		var additionView = object : View(this) {
-			val paint = Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.ANTI_ALIAS_FLAG).apply {
-				typeface = Typeface.SANS_SERIF
-			}
-			val rect = Rect()
-			override fun onDraw(canvas: Canvas?) {
-				super.onDraw(canvas)
-				canvas ?: return
-				val t = player.currentPosition / 1000f
-				val ts = 3f // 视频正常播放时，一条弹幕显示屏幕上的总时长，决定滚动弹幕的速度
-				for (i in addition.binarySearchBy(t - ts) { it.time }.let {
-					if (it < 0) -it - 1 else it
-				} until addition.size) {
-					val d = addition[i]
-					if (d.time > t) break
-					paint.textSize = d.fontSize * min(player.width, player.height) / 480f
-					paint.strokeWidth = paint.textSize / 20f
-					paint.getTextBounds(d.text, 0, d.text.length, rect)
-					val x = when (d.type) {
-						SCROLLING -> (width + rect.width()) * (1f - (t - d.time) / ts) - rect.width()
-						TOP, BOTTOM -> (width - rect.width()) / 2f
-						Comment -> (width - rect.width()) / 2f
-					}
-					val y = (i % (height / 2 / rect.height())) * rect.height().toFloat()
-					paint.style = Paint.Style.STROKE
-					paint.color = Color.BLACK
-					canvas.drawText(d.text, x, y, paint)
-					paint.style = Paint.Style.FILL
-					paint.color = d.color
-					canvas.drawText(d.text, x, y, paint)
-				}
-			}
-		}
-		findViewById<FrameLayout>(R.id.videoFrame).addView(
-			additionView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-		)
 	}
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
