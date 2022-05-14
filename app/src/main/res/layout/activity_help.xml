@@ -25,14 +25,15 @@
         android:id="@+id/textView2"
         android:layout_width="324dp"
         android:layout_height="310dp"
-        android:layout_marginTop="248dp"
-        android:text="这是一个趣味音视频播放器，它不但可以获取本地视频列表、播放系统视频，还能加载弹幕，让观影过程更加有趣！"
+        android:text="\t\t\t\t\t\t嗨！这里是一个趣味音视频播放器，它可以导入本地视频或录制新视频后播放。除了传统视频播放器的开始/暂停以及快进/快退功能以外，对于给定的视频，它能加载已有弹幕，也可以加入新弹幕，让观影过程更加有趣！\n\t\t\t\t\t\t祝你使用愉快！"
         android:textAppearance="@style/TextAppearance.AppCompat.Display3"
         android:textSize="22sp"
         app:layout_constraintBottom_toTopOf="@+id/button7"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.599" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
