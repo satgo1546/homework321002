@@ -73,54 +73,43 @@ class MainActivity : AppCompatActivity() {
 		if (it.resultCode != RESULT_OK) return@registerForActivityResult
 		val inputUri = it.data?.data ?: return@registerForActivityResult
 		contentResolver.openInputStream(inputUri)?.use { inputStream ->
-			val basePath = File(
-				filesDir, SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date())
-			).absolutePath
-			File("$basePath.mp4").outputStream().use { outputStream ->
+			val name = inputUri.lastPathSegment?.replace(Regex("[*?\":/\\\\|<>]"), "_") ?: SimpleDateFormat(
+				"yyyy-MM-dd-HHmmss",
+				Locale.US
+			).format(Date())
+			openFileOutput("$name.mp4", MODE_PRIVATE).use { outputStream ->
 				inputStream.copyTo(outputStream)
 			}
-			addVideo(basePath)
+			addVideo(name)
 		}
 	}
 
-	private var recordingBasePath = ""
+	private var recordingName = ""
 
 	private val videoCaptureActivity = registerForActivityResult(StartActivityForResult()) {
 		if (it.resultCode != RESULT_OK) return@registerForActivityResult
-		addVideo(recordingBasePath)
+		addVideo(recordingName)
 	}
 
-	private fun addVideo(basePath: String) {
-		File("$basePath.xml").writeText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<i>\n</i>\n")
-		(application as MyApplication).videos.add(
-			PredefinedVideo(
-				(application as MyApplication).videos.size + 256,
-				SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date()),
-				"最新力作",
-				FileProvider.getUriForFile(
-					this, "$packageName.fileprovider", File("$basePath.mp4")
-				).toString(),
-				FileProvider.getUriForFile(
-					this, "$packageName.fileprovider", File("$basePath.xml")
-				).toString(),
-			)
-		)
+	private fun addVideo(name: String) {
+		File(filesDir, "$name.txt").writeText("最新力作")
+		File(filesDir, "$name.xml").writeText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<i>\n</i>\n")
+		(application as MyApplication).rescanVideos()
+		// 通过重新过滤来刷新显示的列表。
 		(listView.adapter as VideosAdapter).filter.filter(inputTitle.text)
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-		for (grantResult in grantResults) {
-			if (grantResult != PackageManager.PERMISSION_GRANTED) {
-				Toast.makeText(this, "权限获取失败了……", Toast.LENGTH_SHORT).show()
-				return
-			}
+		if (grantResults.any { it != PackageManager.PERMISSION_GRANTED }) {
+			Toast.makeText(this, "权限不足。", Toast.LENGTH_SHORT).show()
+			return
 		}
-		recordingBasePath = File(filesDir, SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date())).absolutePath
+		recordingName = SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date())
 		videoCaptureActivity.launch(Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
 			putExtra(
 				MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(
-					this@MainActivity, "$packageName.fileprovider", File("$recordingBasePath.mp4")
+					this@MainActivity, "$packageName.fileprovider", File(filesDir, "$recordingName.mp4")
 				)
 			)
 		})

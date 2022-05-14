@@ -4,7 +4,6 @@ import android.animation.TimeAnimator
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.*
-import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -50,7 +49,7 @@ class PlayerActivity : AppCompatActivity() {
 			(application as MyApplication).videos.find { it.id == id } ?: throw IllegalArgumentException("bad id")
 		}
 		title = predefinedVideo.name
-		danmaku = contentResolver.openInputStream(Uri.parse(predefinedVideo.commentsPath)).use {
+		danmaku = openFileInput("${predefinedVideo.name}.xml").use {
 			if (it == null) return@use arrayListOf()
 			Danmaku.listFromXml(it)
 		}
@@ -73,7 +72,7 @@ class PlayerActivity : AppCompatActivity() {
 		}
 
 		player = findViewById(R.id.videoView)
-		player.setVideoPath(predefinedVideo.videoPath)
+		player.setVideoURI(predefinedVideo.getVideoURI(this))
 		player.setOnPreparedListener {
 			it.start()
 			animator.start()
