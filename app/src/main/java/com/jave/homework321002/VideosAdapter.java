@@ -1,6 +1,7 @@
 package com.jave.homework321002;
 
 import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,10 +61,17 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
 
         viewHolder.videoName.setText(currentList.get(i).getName());
         viewHolder.videoDescription.setText(currentList.get(i).getDescription());
+        // 预置视频不可删除。
+        viewHolder.deleteButton.setVisibility(currentList.get(i).getId() <= 2 ? View.GONE : View.VISIBLE);
         viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                videoList.remove(i);
+                if (new File(Uri.parse(currentList.get(i).getVideoPath()).getPath()).delete()
+                && new File(Uri.parse(currentList.get(i).getCommentsPath()).getPath()).delete()) {
+                    videoList.remove(currentList.get(i));
+                    currentList.remove(i);
+                    notifyDataSetChanged();
+                }
             }
         });
 
@@ -124,7 +133,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
                 notifyDataSetChanged();//通知数据发生了改变
                 Log.d("filter", "publishResults:notifyDataSetChanged");
             }else {
-                notifyDataSetInvalidated();//通知数据失效
+                notifyDataSetChanged();//通知数据失效
             }
         }
     }
