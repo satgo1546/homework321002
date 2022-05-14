@@ -4,6 +4,7 @@ import android.animation.TimeAnimator
 import android.content.res.Configuration
 import android.graphics.*
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -204,7 +205,7 @@ class PlayerActivity : AppCompatActivity() {
 		sendButton2 = findViewById(R.id.btn_edit2)
 		sendButton2.setOnClickListener{
 			val danmu = findViewById<EditText>(R.id.input_danmaku).text
-			if(danmu.equals("")) return@setOnClickListener
+			if(TextUtils.isEmpty(danmu)) return@setOnClickListener
 
 			//将弹幕条例写进文件中
 			appendDanmaku(player.currentPosition / 1000f, intArrayOf(5, 25, 15138834), danmu.toString())
@@ -214,9 +215,10 @@ class PlayerActivity : AppCompatActivity() {
 
 		saveButton1 = findViewById(R.id.btn_save_comments)
 		saveButton1.setOnClickListener {
+			if(Comments.isEmpty()) return@setOnClickListener
 			for(d in Comments){
 				//将评论写进文件中
-				appendDanmaku(d.time, intArrayOf(8, 30, 16777215), d.text)
+				appendDanmaku(d.time, intArrayOf(8, 50, 16777215), d.text)
 			}
 			Comments.clear()
 			updateDanmaku()
