@@ -50,7 +50,7 @@ class PlayerActivity : AppCompatActivity() {
 		player.setOnPreparedListener {
 			it.start()
 			animator.start()
-			mediaControllerProgress.max = it.duration
+			mediaControllerProgress.max = it.duration - 1
 			endTime.text = stringForTime(it.duration)
 			updateUi()
 		}
