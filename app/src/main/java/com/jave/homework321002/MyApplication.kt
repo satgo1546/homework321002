@@ -2,6 +2,10 @@ package com.jave.homework321002
 
 import android.app.Application
 import android.content.Context
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.media.ThumbnailUtils
+import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import java.io.File
 
@@ -12,9 +16,21 @@ data class PredefinedVideo(
 	val name: String,
 	val description: String,
 ) {
+	private var thumbnail: Drawable? = null
 	fun getVideoURI(context: Context) = FileProvider.getUriForFile(
 		context, "${context.packageName}.fileprovider", File(context.filesDir, "$name.mp4")
 	)
+
+	@Suppress("DEPRECATION")
+	fun getThumbnailDrawable(context: Context): Drawable {
+		if (thumbnail == null) {
+			// API等级29中弃用了该方法，而对应的替代方法增加于API等级29。这样的弃用未免还是太超前了。
+			thumbnail = ThumbnailUtils.createVideoThumbnail(
+				File(context.filesDir, "$name.mp4").absolutePath, MediaStore.Images.Thumbnails.MINI_KIND
+			)?.let { BitmapDrawable(it) } ?: context.resources.getDrawable(android.R.drawable.ic_media_play)
+		}
+		return thumbnail!!
+	}
 }
 
 class MyApplication : Application() {

@@ -1,7 +1,6 @@
 package com.jave.homework321002;
 
 import android.content.Context;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -54,6 +53,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
             viewHolder.videoName = view.findViewById(R.id.text1);
             viewHolder.videoDescription = view.findViewById(R.id.textView);
             viewHolder.deleteButton = view.findViewById(R.id.btn_delete);
+            viewHolder.thumbnailImage = view.findViewById(R.id.imageView);
             view.setTag(viewHolder);
         }else {
             viewHolder = (ViewHolder) view.getTag();
@@ -61,16 +61,14 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
 
         viewHolder.videoName.setText(currentList.get(i).getName());
         viewHolder.videoDescription.setText(currentList.get(i).getDescription());
-        viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                for (String suffix : new String []  {".txt", ".xml", ".mp4"}) {
-                    if (!new File(view.getContext().getFilesDir(), currentList.get(i).getName() + suffix).delete()) return;
-                }
-                currentList.remove(i);
-                ((MyApplication) view.getContext().getApplicationContext()).rescanVideos();
-                notifyDataSetChanged();
+        viewHolder.thumbnailImage.setImageDrawable(currentList.get(i).getThumbnailDrawable(view.getContext()));
+        viewHolder.deleteButton.setOnClickListener(view1 -> {
+            for (String suffix : new String []  {".txt", ".xml", ".mp4"}) {
+                if (!new File(view1.getContext().getFilesDir(), currentList.get(i).getName() + suffix).delete()) return;
             }
+            currentList.remove(i);
+            ((MyApplication) view1.getContext().getApplicationContext()).rescanVideos();
+            notifyDataSetChanged();
         });
 
 
@@ -81,6 +79,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
         public TextView videoName;
         public TextView videoDescription;
         public ImageView deleteButton;
+        public ImageView thumbnailImage;
     }
 
     @Override
