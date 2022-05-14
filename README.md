@@ -12,7 +12,7 @@
 
 视频新弹幕发送页（编辑页）
 
-![img](image/README/1652539216184.png)
+![img](image/README/ZZ7(]BSMJZCOHGCNQG%[T~M.jpg)
 
 ## 主要技术
 文件系统存储
