@@ -83,11 +83,13 @@ class PlayerActivity : AppCompatActivity() {
 				canvas ?: return
 				val t = player.currentPosition / 1000f
 				val ts = 3f // 视频正常播放时，一条弹幕显示屏幕上的总时长，决定滚动弹幕的速度
-				for (i in danmaku.binarySearchBy(t - ts) { it.time }.let {
+				// 为了在同一时刻只绘制一条歌词，从当前时间点往早先倒序绘制弹幕。
+				var commentEncountered = false
+				for (i in danmaku.binarySearchBy(t) { it.time }.let {
 					if (it < 0) -it - 1 else it
-				} until danmaku.size) {
+				} - 1 downTo 0) {
 					val d = danmaku[i]
-					if (d.time > t) break
+					if (d.time < t - ts) break
 					paint.textSize = d.fontSize * min(player.width, player.height) / 480f
 					paint.strokeWidth = paint.textSize / 20f
 					paint.getTextBounds(d.text, 0, d.text.length, rect)
@@ -96,7 +98,13 @@ class PlayerActivity : AppCompatActivity() {
 						TOP, BOTTOM -> (width - rect.width()) / 2f
 						Comment -> (width - rect.width()) / 2f  //歌词放在最底部
 					}
-					val y = (i % (height / 2 / rect.height())) * rect.height().toFloat()
+					val y = if (d.type == Comment) {
+						if (commentEncountered) continue
+						commentEncountered = true
+						height - rect.height().toFloat() / 2
+					} else {
+						(i % (height / 2 / rect.height()) + 1) * rect.height().toFloat()
+					}
 					paint.style = Paint.Style.STROKE
 					paint.color = Color.BLACK
 					canvas.drawText(d.text, x, y, paint)
