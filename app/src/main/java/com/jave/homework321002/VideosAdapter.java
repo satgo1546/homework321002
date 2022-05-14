@@ -61,17 +61,15 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
 
         viewHolder.videoName.setText(currentList.get(i).getName());
         viewHolder.videoDescription.setText(currentList.get(i).getDescription());
-        // 预置视频不可删除。
-        viewHolder.deleteButton.setVisibility(currentList.get(i).getId() <= 2 ? View.GONE : View.VISIBLE);
         viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (new File(Uri.parse(currentList.get(i).getVideoPath()).getPath()).delete()
-                && new File(Uri.parse(currentList.get(i).getCommentsPath()).getPath()).delete()) {
-                    videoList.remove(currentList.get(i));
-                    currentList.remove(i);
-                    notifyDataSetChanged();
+                for (String suffix : new String []  {".txt", ".xml", ".mp4"}) {
+                    if (!new File(view.getContext().getFilesDir(), currentList.get(i).getName() + suffix).delete()) return;
                 }
+                currentList.remove(i);
+                ((MyApplication) view.getContext().getApplicationContext()).rescanVideos();
+                notifyDataSetChanged();
             }
         });
 
@@ -129,12 +127,7 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
 
             currentList = (List<PredefinedVideo>) filterResults.values;
             Log.d("filter", "publishResults:"+filterResults.count);
-            if (filterResults.count>0){
-                notifyDataSetChanged();//通知数据发生了改变
-                Log.d("filter", "publishResults:notifyDataSetChanged");
-            }else {
-                notifyDataSetChanged();//通知数据失效
-            }
+            notifyDataSetChanged();//通知数据发生了改变
         }
     }
 
