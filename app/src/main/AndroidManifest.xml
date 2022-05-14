@@ -1,34 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jave.homework321002">
+          package="com.jave.homework321002">
+
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
-        android:name=".MyApplication"
-        android:allowBackup="true"
-        android:fullBackupOnly="true"
-        android:icon="@drawable/ic_launcher_background"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.Homework321002">
+            android:name=".MyApplication"
+            android:allowBackup="true"
+            android:fullBackupOnly="true"
+            android:icon="@drawable/ic_launcher_background"
+            android:label="@string/app_name"
+            android:supportsRtl="true"
+            android:theme="@style/Theme.Homework321002">
         <activity
-            android:name=".HelpActivity"
-            android:exported="false" />
+                android:name=".EditActivity"
+                android:exported="true"/>
         <activity
-            android:name=".PlayerActivity"
-            android:configChanges="orientation|uiMode|touchscreen|layoutDirection|screenLayout|screenSize|smallestScreenSize|colorMode|keyboard|keyboardHidden|fontScale|fontWeightAdjustment|density|navigation|mcc|mnc"
-            android:exported="true" />
+                android:name=".HelpActivity"
+                android:exported="false"/>
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+                android:name=".PlayerActivity"
+                android:configChanges="orientation|uiMode|touchscreen|layoutDirection|screenLayout|screenSize|smallestScreenSize|colorMode|keyboard|keyboardHidden|fontScale|fontWeightAdjustment|density|navigation|mcc|mnc"
+                android:exported="true"/>
+        <activity
+                android:name=".MainActivity"
+                android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"
@@ -36,7 +41,7 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/filepaths" />
+                    android:resource="@xml/filepaths"/>
         </provider>
     </application>
 
