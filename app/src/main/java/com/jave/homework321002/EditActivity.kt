@@ -1,10 +1,10 @@
 package com.jave.homework321002
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ListView
+import androidx.appcompat.app.AppCompatActivity
+import java.io.File
 
 class EditActivity : AppCompatActivity() {
     private lateinit var editTitle: EditText
@@ -26,6 +26,11 @@ class EditActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_save_edit).setOnClickListener {
             //保存视频信息
 
+            File(filesDir, "${predefinedVideo.name}.txt").writeText(editDesc.text.toString())
+            arrayOf(".txt", ".xml", ".mp4").forEach {
+                File(filesDir, predefinedVideo.name + it).renameTo(File(filesDir, editTitle.text.toString() + it))
+            }
+            setResult(RESULT_OK)
 
             this.finish()
         }

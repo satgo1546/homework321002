@@ -35,6 +35,12 @@ class MainActivity : AppCompatActivity() {
 				putExtra("id", (application as MyApplication).videos[i].id)
 			})
 		}
+		listView.setOnItemLongClickListener { adapterView, view, i, l ->
+			refreshListOnResult.launch(Intent(this, EditActivity::class.java).apply {
+				putExtra("id", (application as MyApplication).videos[i].id)
+			})
+			true
+		}
 
 		findViewById<Button>(R.id.button4).setOnClickListener {
 			startActivity(Intent(this, HelpActivity::class.java))
@@ -67,6 +73,11 @@ class MainActivity : AppCompatActivity() {
 		findViewById<Button>(R.id.button3).setOnClickListener {
 			ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO), 0)
 		}
+	}
+
+	private val refreshListOnResult = registerForActivityResult(StartActivityForResult()) {
+		(application as MyApplication).rescanVideos()
+		(listView.adapter as VideosAdapter).filter.filter(inputTitle.text)
 	}
 
 	private val filePickerActivity = registerForActivityResult(StartActivityForResult()) {
