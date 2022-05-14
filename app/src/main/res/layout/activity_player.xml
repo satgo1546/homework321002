@@ -107,15 +107,76 @@
 						android:orientation="horizontal"
 						android:layout_width="match_parent"
 						android:layout_height="match_parent" android:baselineAligned="false">
-			<ListView
-							android:layout_width="0dp"
-							android:layout_height="match_parent" android:layout_weight="1" android:id="@+id/objectList"/>
-			<ScrollView
-							android:layout_width="0dp"
-							android:layout_height="match_parent" android:layout_weight="2">
-				<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-											android:orientation="vertical"/>
-			</ScrollView>
+			<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="match_parent"
+					android:layout_weight="4" android:id="@+id/input_list"
+					android:orientation="vertical">
+				<LinearLayout android:layout_width="match_parent"
+							  android:layout_height="wrap_content"
+							  android:orientation="vertical">
+					<LinearLayout android:layout_width="wrap_content"
+								  android:layout_height="wrap_content"
+								  android:orientation="horizontal">
+						<EditText android:layout_width="80dp"
+								  android:layout_height="50dp"
+								  android:id="@+id/input_time"
+								  android:hint="时间点"/>
+						<EditText android:layout_width="140dp"
+								  android:layout_height="match_parent"
+								  android:layout_marginLeft="10dp"
+								  android:id="@+id/input_comment"
+								  android:hint="歌词/字幕/评论"/>
+					</LinearLayout>
+					<Button android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_gravity="right"
+							android:id="@+id/btn_edit1"
+							android:text="输入"/>
+				</LinearLayout>
+				<LinearLayout android:layout_width="match_parent"
+							  android:layout_height="wrap_content"
+							  android:layout_marginTop="15dp"
+							  android:orientation="vertical">
+					<LinearLayout android:layout_width="match_parent"
+								  android:layout_height="wrap_content"
+								  android:orientation="horizontal">
+						<EditText android:layout_width="match_parent"
+								  android:layout_height="match_parent"
+								  android:id="@+id/input_danmaku"
+								  android:hint="弹幕"/>
+					</LinearLayout>
+					<Button android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_gravity="right"
+							android:id="@+id/btn_edit2"
+							android:text="发送"/>
+				</LinearLayout>
+			</LinearLayout>
+			<LinearLayout android:layout_width="0dp"
+						  android:layout_height="match_parent"
+						  android:orientation="vertical"
+						  android:layout_weight="3">
+				<ScrollView
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_weight="15"
+				>
+					<LinearLayout android:layout_width="match_parent"
+								  android:layout_height="wrap_content"
+								  android:id="@+id/content_view"
+								  android:orientation="vertical">
+
+					</LinearLayout>
+
+				</ScrollView>
+				<Button android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:layout_gravity="center_horizontal"
+						android:id="@+id/btn_save_comments"
+						android:text="保存"/>
+			</LinearLayout>
 		</LinearLayout>
 	</LinearLayout>
 </LinearLayout>

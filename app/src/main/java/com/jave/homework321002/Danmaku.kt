@@ -13,7 +13,7 @@ data class Danmaku(
 	var text: String,
 ) {
 	enum class Type {
-		SCROLLING, BOTTOM, TOP,
+		SCROLLING, BOTTOM, TOP, Comment,
 	}
 
 	companion object {
@@ -33,6 +33,8 @@ data class Danmaku(
 								"4" -> Type.BOTTOM
 								"5" -> Type.TOP
 								"1", "6" -> Type.SCROLLING
+								"7" -> Type.TOP
+								"8" -> Type.Comment  //时间点标记弹幕（歌词）
 								else -> continue
 							}, params[2].toFloat(), params[3].toInt() or 0xff000000.toInt(), parser.nextText()
 						)

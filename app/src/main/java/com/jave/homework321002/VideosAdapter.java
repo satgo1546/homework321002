@@ -8,15 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
+import java.nio.file.FileSystemException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VideosAdapter extends BaseAdapter implements Filterable {
     LayoutInflater inflater;
-    List<PredefinedVideo> videoList;
+    public List<PredefinedVideo> videoList;
     public List<PredefinedVideo> currentList;  //过滤后的数据
     MyFilter mFilter ;
-
     public VideosAdapter(Context context, List<PredefinedVideo> list){
         videoList = list;
         inflater = LayoutInflater.from(context);
@@ -62,7 +62,8 @@ public class VideosAdapter extends BaseAdapter implements Filterable {
         viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                videoList.remove(i);
+
+                view.setActivated(false);
             }
         });
 
