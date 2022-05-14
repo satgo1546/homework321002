@@ -57,10 +57,29 @@ class MainActivity : AppCompatActivity() {
 			override fun afterTextChanged(s: Editable) = Unit
 		})
 
-		findViewById<Button>(R.id.button2).setOnClickListener { }
+		findViewById<Button>(R.id.button2).setOnClickListener {
+			filePickerActivity.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+				// 如何指定音/视频？video/*选择视频，audio/*选择音频，没有办法指定并集。
+				type = "*/*"
+			})
+		}
 
 		findViewById<Button>(R.id.button3).setOnClickListener {
 			ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO), 0)
+		}
+	}
+
+	private val filePickerActivity = registerForActivityResult(StartActivityForResult()) {
+		if (it.resultCode != RESULT_OK) return@registerForActivityResult
+		val inputUri = it.data?.data ?: return@registerForActivityResult
+		contentResolver.openInputStream(inputUri)?.use { inputStream ->
+			val basePath = File(
+				filesDir, SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date())
+			).absolutePath
+			File("$basePath.mp4").outputStream().use { outputStream ->
+				inputStream.copyTo(outputStream)
+			}
+			addVideo(basePath)
 		}
 	}
 
@@ -68,17 +87,21 @@ class MainActivity : AppCompatActivity() {
 
 	private val videoCaptureActivity = registerForActivityResult(StartActivityForResult()) {
 		if (it.resultCode != RESULT_OK) return@registerForActivityResult
-		File("$recordingBasePath.xml").writeText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<i>\n</i>\n")
+		addVideo(recordingBasePath)
+	}
+
+	private fun addVideo(basePath: String) {
+		File("$basePath.xml").writeText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<i>\n</i>\n")
 		(application as MyApplication).videos.add(
 			PredefinedVideo(
-				114514,
-				SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()),
+				(application as MyApplication).videos.size + 256,
+				SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date()),
 				"最新力作",
 				FileProvider.getUriForFile(
-					this, "$packageName.fileprovider", File("$recordingBasePath.mp4")
+					this, "$packageName.fileprovider", File("$basePath.mp4")
 				).toString(),
 				FileProvider.getUriForFile(
-					this, "$packageName.fileprovider", File("$recordingBasePath.xml")
+					this, "$packageName.fileprovider", File("$basePath.xml")
 				).toString(),
 			)
 		)
@@ -93,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 				return
 			}
 		}
-		recordingBasePath = File(filesDir, SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())).absolutePath
+		recordingBasePath = File(filesDir, SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date())).absolutePath
 		videoCaptureActivity.launch(Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
 			putExtra(
 				MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(
