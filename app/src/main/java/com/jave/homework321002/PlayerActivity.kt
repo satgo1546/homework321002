@@ -98,7 +98,7 @@ class PlayerActivity : AppCompatActivity() {
 				super.onDraw(canvas)
 				canvas ?: return
 				val t = player.currentPosition / 1000f
-				val ts = 3f // 视频正常播放时，一条弹幕显示屏幕上的总时长，决定滚动弹幕的速度
+				val ts = 4f // 视频正常播放时，一条弹幕显示屏幕上的总时长，决定滚动弹幕的速度
 				// 为了在同一时刻只绘制一条歌词，从当前时间点往早先倒序绘制弹幕。
 				var commentEncountered = false
 				for (i in danmaku.binarySearchBy(t) { it.time }.let {
@@ -229,7 +229,7 @@ class PlayerActivity : AppCompatActivity() {
 			if(TextUtils.isEmpty(danmu)) return@setOnClickListener
 
 			//将弹幕条例写进文件中
-			appendDanmaku(player.currentPosition / 1000f, intArrayOf(4, 25, 15138834), danmu.toString())
+			appendDanmaku(player.currentPosition / 1000f, intArrayOf(1, 25, 15138834), danmu.toString())
 			updateDanmaku()
 			Toast.makeText(this, "发送弹幕成功", Toast.LENGTH_SHORT).show()
 		}
