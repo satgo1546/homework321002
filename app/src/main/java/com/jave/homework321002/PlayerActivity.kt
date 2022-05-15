@@ -4,14 +4,19 @@ import android.animation.TimeAnimator
 import android.content.res.Configuration
 import android.graphics.*
 import android.os.Bundle
+import android.text.Layout.Alignment
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.text.TextUtils
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.jave.homework321002.Danmaku.Type.*
+import androidx.core.graphics.withTranslation
+import com.jave.homework321002.Danmaku.Type.Comment
 import java.io.File
 import java.io.RandomAccessFile
 import kotlin.math.min
+
 
 // 关于媒体控制器的实现抄自一教程，该教程中的代码又抄自Android本身。
 // https://github.com/brightec/ExampleMediaController
@@ -85,6 +90,10 @@ class PlayerActivity : AppCompatActivity() {
 				typeface = Typeface.SANS_SERIF
 			}
 			val rect = Rect()
+			val textPaint = TextPaint().apply {
+				isAntiAlias = true
+				typeface = Typeface.SERIF
+			}
 			override fun onDraw(canvas: Canvas?) {
 				super.onDraw(canvas)
 				canvas ?: return
@@ -98,26 +107,38 @@ class PlayerActivity : AppCompatActivity() {
 					val d = danmaku[i]
 					if (d.time < t - ts) break
 					paint.textSize = d.fontSize * min(player.width, player.height) / 480f
-					paint.strokeWidth = paint.textSize / 20f
-					paint.getTextBounds(d.text, 0, d.text.length, rect)
-					val x = when (d.type) {
-						SCROLLING -> (width + rect.width()) * (1f - (t - d.time) / ts) - rect.width()
-						TOP, BOTTOM -> (width - rect.width()) / 2f
-						Comment -> (width - rect.width()) / 2f  //歌词放在最底部
-					}
-					val y = if (d.type == Comment) {
+					if (d.type == Comment) {
 						if (commentEncountered) continue
 						commentEncountered = true
-						height - rect.height().toFloat() / 2
+						paint.style = Paint.Style.FILL
+						paint.color = Color.BLACK
+						textPaint.color = d.color
+						textPaint.textSize = paint.textSize
+						val staticLayout = StaticLayout.Builder
+							.obtain(d.text, 0, d.text.length, textPaint, width)
+							.setAlignment(Alignment.ALIGN_CENTER)
+							.setIncludePad(true)
+							.build()
+						canvas.withTranslation(0f, (height - staticLayout.height).toFloat()) {
+							drawRect(0f, 0f, width.toFloat(), staticLayout.height.toFloat(), paint)
+							staticLayout.draw(canvas)
+						}
 					} else {
-						(i % (height / 2 / rect.height()) + 1) * rect.height().toFloat()
+						paint.strokeWidth = paint.textSize / 20f
+						paint.getTextBounds(d.text, 0, d.text.length, rect)
+						val x = if (d.type == Danmaku.Type.SCROLLING) {
+							(width + rect.width()) * (1f - (t - d.time) / ts) - rect.width()
+						} else {
+							(width - rect.width()) / 2f
+						}
+						val y = (i % (height / 2 / rect.height()) + 1) * rect.height().toFloat()
+						paint.style = Paint.Style.STROKE
+						paint.color = Color.BLACK
+						canvas.drawText(d.text, x, y, paint)
+						paint.style = Paint.Style.FILL
+						paint.color = d.color
+						canvas.drawText(d.text, x, y, paint)
 					}
-					paint.style = Paint.Style.STROKE
-					paint.color = Color.BLACK
-					canvas.drawText(d.text, x, y, paint)
-					paint.style = Paint.Style.FILL
-					paint.color = d.color
-					canvas.drawText(d.text, x, y, paint)
 				}
 			}
 		}
@@ -208,7 +229,7 @@ class PlayerActivity : AppCompatActivity() {
 			if(TextUtils.isEmpty(danmu)) return@setOnClickListener
 
 			//将弹幕条例写进文件中
-			appendDanmaku(player.currentPosition / 1000f, intArrayOf(5, 25, 15138834), danmu.toString())
+			appendDanmaku(player.currentPosition / 1000f, intArrayOf(4, 25, 15138834), danmu.toString())
 			updateDanmaku()
 			Toast.makeText(this, "发送弹幕成功", Toast.LENGTH_SHORT).show()
 		}
